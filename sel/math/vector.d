@@ -290,6 +290,13 @@ struct Vector(T, char[] c) if(c.length > 1 && areValidCoordinates(c)) {
 		return "Vector!(" ~ T.stringof ~ ", \"" ~ coordinates.idup ~ "\")(" ~ cs.join(", ") ~ ")";
 	}
 	
+	public size_t toHash() const @safe pure nothrow {
+		size_t hash;
+		foreach (ref value; array) {
+			hash = hashOf(value, hash);
+		}
+		return hash;
+	}
 }
 
 /// ditto
@@ -522,4 +529,17 @@ unittest {
 	aa[Vector2!int(1, 2)] = 4;
 	assert(aa[Vector2!int(1, 2)] == 4);
 	
+	Vector3!int[] hashes = [
+		Vector3!int(0, 0, 0),
+		Vector3!int(1, 0, 0),
+		Vector3!int(0, 1, 0),
+		Vector3!int(0, 0, 1),
+		Vector3!int(1, 0, 1)
+	];
+	foreach (hash; hashes)
+		assert(hash.toHash != 0);
+
+	foreach (a; hashes)
+		foreach (b; hashes)
+			assert(a == b || a.toHash != b.toHash);
 }
